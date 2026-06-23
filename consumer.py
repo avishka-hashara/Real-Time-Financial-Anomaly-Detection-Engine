@@ -9,7 +9,7 @@ print("1. Loading Models and Thresholds...")
 iso_forest = joblib.load('models/iso_forest.pkl')['model']
 iso_scaler = joblib.load('models/iso_forest.pkl')['scaler']
 
-lstm_model = load_model('models/lstm_autoencoder.h5')
+lstm_model = load_model('models/lstm_autoencoder.h5', compile=False)
 lstm_scaler = joblib.load('models/lstm_scaler.pkl')
 
 with open('models/threshold.txt', 'r') as f:
@@ -85,7 +85,7 @@ while True:
                     
                     # Print alert if risk is high or if it's an actual fraud case to verify
                     if risk_score > 70 or true_class == 1:
-                        alert = "🚨 HIGH RISK" if risk_score > 70 else "⚠️ FRAUD MISSED?"
+                        alert = "[ALERT] HIGH RISK" if risk_score > 70 else "[WARNING] FRAUD MISSED?"
                         print(f"{alert} | User: {tx['user_id']} | Amt: ${tx['Amount']:.2f} | Risk Score: {risk_score:.1f}/100 | Actual Fraud: {'Yes' if true_class == 1 else 'No'}")
                     
                     last_id = msg_id
