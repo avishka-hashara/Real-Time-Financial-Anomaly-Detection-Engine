@@ -6,14 +6,23 @@ const App = () => {
   const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
-    // Connect to the FastAPI WebSocket
-    const ws = new WebSocket('ws://localhost:8000/ws');
+    // Swapped localhost to 127.0.0.1 to prevent Windows IPv6 routing quirks
+    const ws = new WebSocket('ws://127.0.0.1:8000/ws');
+
+    ws.onopen = () => console.log("🟢 WebSocket Connected to Server!");
 
     ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      // Keep only the 50 most recent transactions to prevent memory bloat
-      setTransactions((prev) => [data, ...prev].slice(0, 50));
+      try {
+        const data = JSON.parse(event.data);
+        console.log("🔵 Incoming Transaction:", data); // Let's see the payload!
+        setTransactions((prev) => [data, ...prev].slice(0, 50));
+      } catch (err) {
+        console.error("🔴 Failed to parse WebSocket message:", event.data);
+      }
     };
+
+    ws.onerror = (error) => console.error("🔴 WebSocket Error:", error);
+    ws.onclose = () => console.log("⭕ WebSocket Disconnected");
 
     return () => ws.close();
   }, []);
