@@ -83,10 +83,19 @@ while True:
                     
                     risk_score, true_class = ensemble_score(tx)
                     
-                    # Print alert if risk is high or if it's an actual fraud case to verify
+                    # NEW: Create a payload and publish to Redis Pub/Sub
+                    payload = {
+                        "user_id": tx["user_id"],
+                        "amount": tx["Amount"],
+                        "risk_score": float(risk_score),
+                        "is_fraud": int(true_class),
+                        "timestamp": tx["timestamp"]
+                    }
+                    r.publish('scored_txns', json.dumps(payload))
+                    
                     if risk_score > 70 or true_class == 1:
-                        alert = "[ALERT] HIGH RISK" if risk_score > 70 else "[WARNING] FRAUD MISSED?"
-                        print(f"{alert} | User: {tx['user_id']} | Amt: ${tx['Amount']:.2f} | Risk Score: {risk_score:.1f}/100 | Actual Fraud: {'Yes' if true_class == 1 else 'No'}")
+                        alert = "[ALERT] HIGH RISK" if risk_score > 70 else "[WARNING] FRAUD MISSED"
+                        print(f"{alert} | User: {tx['user_id']} | Amt: ${tx['Amount']:.2f} | Risk Score: {risk_score:.1f}/100")
                     
                     last_id = msg_id
     except KeyboardInterrupt:
