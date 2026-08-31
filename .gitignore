@@ -1,3 +1,5 @@
 /venv/
 creditcard_engineered.csv
 creditcard.csv
+config.bat
+node_modules

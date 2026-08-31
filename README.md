@@ -1,8 +1,8 @@
+![Sentinel Anomaly Engine Banner](docs/banner.png)
+
 # Sentinel Anomaly Engine
 
 > Real-time credit card fraud detection using an LSTM Autoencoder + Isolation Forest ensemble, streamed live to a React dashboard via Redis and WebSockets.
-
-![Sentinel Anomaly Engine Dashboard](docs/dashboard.png)
 
 ---
 
@@ -16,7 +16,7 @@ The system is built in four distinct phases:
 |---|---|
 | **1 — Feature Engineering** | Enriches raw PCA transaction data with 6 behavioral features |
 | **2 — Model Training** | Trains Isolation Forest + LSTM Autoencoder offline |
-| **3 — Live Pipeline** | Streams transactions through Redis → Consumer → Pub/Sub |
+| **3 — Live Pipeline** | Streams transactions through Redis -> Consumer -> Pub/Sub |
 | **4 — UI** | FastAPI WebSocket server feeds a React dashboard in real time |
 
 ---
@@ -106,10 +106,10 @@ These features help models detect **behavioral anomalies** (sudden country chang
 ### LSTM Autoencoder — `train_lstm.py`
 
 - Sequence-based anomaly detection — learns **normal transaction patterns over time**
-- Architecture: `LSTM(32) → RepeatVector(10) → LSTM(32) → TimeDistributed(Dense)`
+- Architecture: `LSTM(32) -> RepeatVector(10) -> LSTM(32) -> TimeDistributed(Dense)`
 - Trained **only on normal transactions** (Class = 0) to learn the reconstruction of non-fraud sequences
 - Anomaly = high reconstruction error (MAE) on unseen sequences
-- Threshold set at `mean + 3σ` of validation reconstruction errors
+- Threshold set at `mean + 3*sigma` of validation reconstruction errors
 - Saved to: `models/lstm_autoencoder.h5`, `models/lstm_scaler.pkl`, `models/threshold.txt`
 
 ### Ensemble Scoring — `consumer.py`
@@ -117,7 +117,7 @@ These features help models detect **behavioral anomalies** (sudden country chang
 At inference time the two model scores are fused:
 
 ```
-final_risk = (isolation_forest_risk × 0.40) + (lstm_risk × 0.60)
+final_risk = (isolation_forest_risk * 0.40) + (lstm_risk * 0.60)
 ```
 
 The LSTM carries more weight because it captures **sequential behavioral context** (10-transaction sliding window per user) that the stateless Isolation Forest misses. The result is a 0–100 risk score emitted per transaction.
@@ -164,7 +164,9 @@ Bridge between Redis and the browser:
 
 ## Dashboard
 
-**Stack:** React 19 · Vite 8 · Tailwind CSS v4 · Recharts · Lucide React · Inter font
+![Sentinel Anomaly Engine Dashboard](docs/dashboard.png)
+
+**Stack:** React 19 / Vite 8 / Tailwind CSS v4 / Recharts / Lucide React / Inter font
 
 **Path:** `anomaly-dashboard/`
 
@@ -177,7 +179,7 @@ Bridge between Redis and the browser:
 
 **WebSocket lifecycle:**
 ```
-ws://127.0.0.1:8000/ws  →  onmessage  →  setTransactions (ring buffer, max 50)
+ws://127.0.0.1:8000/ws -> onmessage -> setTransactions (ring buffer, max 50)
 ```
 State is held in a single `useState` array. Chart data reverses the array on render to produce a left-to-right timeline.
 
@@ -203,7 +205,7 @@ State is held in a single `useState` array. Chart data reverses the array on ren
 ## Project Structure
 
 ```
-credi-card-fraud-detections/
+redi-card-fraud-detections/
 │
 ├── creditcard.csv                  # Raw Kaggle dataset (not committed)
 ├── creditcard_engineered.csv       # Feature-engineered output
@@ -214,7 +216,7 @@ credi-card-fraud-detections/
 ├── train_lstm.py                   # LSTM Autoencoder training (Phase 2b)
 │
 ├── producer.py                     # Redis Stream publisher @ 10 tx/sec
-├── consumer.py                     # Ensemble scorer → Redis Pub/Sub
+├── consumer.py                     # Ensemble scorer -> Redis Pub/Sub
 ├── server.py                       # FastAPI WebSocket server
 │
 ├── models/
@@ -229,6 +231,7 @@ credi-card-fraud-detections/
 │   └── package.json
 │
 └── docs/
+    ├── banner.png                  # Product hero banner mockup
     └── dashboard.png               # Dashboard screenshot
 ```
 
@@ -287,9 +290,9 @@ Open [http://localhost:5173](http://localhost:5173) — transactions will begin 
 ```
 Risk Score = 0–100
 
-  0 – 40   Low risk      ●  Cyan indicator
- 41 – 70   Medium risk   ●  Cyan indicator
- 71 – 100  HIGH RISK     ●  Rose indicator + row highlight + alert card
+  0 - 40   Low risk      [Cyan indicator]
+ 41 - 70   Medium risk   [Cyan indicator]
+ 71 - 100  HIGH RISK     [Rose indicator + row highlight + alert card]
 ```
 
 A score above 70 triggers:
